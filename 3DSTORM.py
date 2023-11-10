@@ -1,6 +1,20 @@
 import numpy as np
 import pandas as pd
 
+Name1 = input("XY Data file name: ")
+Name1=str(Name1)
+Name2 = input("XZ Data file name: ")
+Name2=str(Name2)
+XYPIX = input("XY pixel size [nm]: ")
+XYPIX=int(XYPIX)
+ZPIX = input("Z pixel size [nm]: ")
+ZPIX=int(ZPIX)
+XYSEARCH = input("XY search radius [nm]: ")
+XYSEARCH=int(XYSEARCH)
+ZSEARCH = input("Z search radius [nm]: ")
+ZSEARCH=int(ZSEARCH)
+print("Please wait...")
+
 def Set_Units(XY, Z, name_xy, name_xz):
     """Open and read ThunderSTORM Analysis files and save the data with standard formatting.
     
@@ -12,7 +26,6 @@ def Set_Units(XY, Z, name_xy, name_xz):
     
     Returns:
     Data: A dataset containing all of the ThunderSTORM values, separated into standart formatted columns.
-    
     """
     df_xy = pd.read_csv(name_xy)
     df_xz = pd.read_csv(name_xz)
@@ -33,16 +46,15 @@ def Set_Units(XY, Z, name_xy, name_xz):
     return Data
 
 def Find_Overlap(PM_y, PM_z, data):
-    """For each XZ localization, search all XY localizations for a value which overlaps 
-    within the 3D Uncertainty. 
+    """For each XZ localization, search all XY localizations for a value which overlaps within the 3D Uncertainty. 
     
     Args:
-    data: A pandas dataframe of all X, Y, Z localization and uncertainties obtained from the XY and XZ data.
+    data: A dictionary of all X, Y, Z localizations and associated uncertainties obtained from the XY and XZ data.
     PM_y: The integer value of the uncertainty in Y, which is the step size for the XZ data.
     PM_z: The integer value of the uncertainty in Z, which is the step size for the XY data.
     
     Returns:
-    overlapped_data: A dictionary of particle data where overlap between the XY and XZ data occurs in standard formatting
+    overlapped_data: A dictionary of particle data where overlap between the XY and XZ data occurs in standard formatting.
     """
     XY_Index = []
     XZ_Index = []
@@ -84,16 +96,15 @@ def Find_Overlap(PM_y, PM_z, data):
     return overlapped_data
 
 def Uncertainty_Calculation(data):
-    """Using the data acquired from the overlap calculation, which includes
-    can include many duplicate points, filter through all of the duplicates
-    and only save the overlapped values with the smallest uncertainty.
+    """Using the data acquired from the overlap calculation, which includes can include many duplicate points, filter through all of 
+    the duplicates and only save the overlapped values with the smallest uncertainty.
     
     Args: 
-    Data: The list of XY and XZ overlapped points in standard formatting.
+    data: A dictionary of particle data where overlap between the XY and XZ data occurs, in standard formatting.
     
     Returns:
-    data_updated: A list of standard formatting data which includes the 
-    overlapped data without any duplicate points, as selected by uncertainty.
+    data_updated: A dictionary which includes the overlapped data without any duplicate points, as selected by uncertainty, in 
+    standard formatting.
     """
     for s in range(0, 2):
         if s == 0:
@@ -122,7 +133,6 @@ def Uncertainty_Calculation(data):
                 values_Y.append(data["Y_"+str(other_orientation)][locations[j]])
                 values_Z.append(data["Z_"+str(other_orientation)][locations[j]])
                 values_Uncert.append(data[str(uncert_orientation)][locations[j]])
-            
             min_uncert = np.where(values_Uncert == min(values_Uncert))
             index_uncert = locations[min_uncert[0]]              
             certain_points[0].append(data["X_XY"][index_uncert[0]])
@@ -148,16 +158,15 @@ def Uncertainty_Calculation(data):
     return data_updated
 
 def Proximity_Calculation(data):
-    """Using the data acquired from the overlap calculation, which includes
-    can include many duplicate points, filter through all of the duplicates
-    and only save the overlapped values with the closest 3D proximity.
+    """Using the data acquired from the overlap calculation, which includes can include many duplicate points, filter through all 
+    of the duplicates and only save the overlapped values with the closest 3D proximity.
     
     Args: 
-    Data: The list of XY and XZ overlapped points in standard formatting.
+    data: A dictionary of particle data where overlap between the XY and XZ data occurs, in standard formatting.
     
     Returns:
-    data_updated: A list of standard formatting data which includes the 
-    overlapped data without any duplicate points, as selected by proximity.
+    data_updated: A dictionary which includes the overlapped data without any duplicate points, as selected by proximity, in 
+    standard formatting.
     """
     for s in range(0, 2):
         if s == 0:
@@ -219,19 +228,17 @@ def Proximity_Calculation(data):
     return data_updated
 
 def Isolated_Points(data):
-    """Using the data acquired from either the uncertainty or the proximity calculation, 
-    filter through all of the localizations and determine if any of them are within 
-    3D uncertainty of others, indicating that it is multiple measurements from the same
-    particle. If a group of multiple measurements is found, select and save only the 
-    measurement with the smallest uncertainty.
+    """Using the data acquired from either the uncertainty or the proximity calculation, filter through all of the localizations 
+    and determine if any of them are within 3D uncertainty of others, indicating that it is multiple measurements from the same 
+    particle. If a group of multiple measurements is found, select and save only the measurement with the smallest uncertainty.
     
     Args:
-    Data: The list of XY and XZ overlapped points, containing no duplicates after calculation
-    from the uncertainty method or the proximity method, in standard formatting.
+    data: A dictionary of XY and XZ overlapped points, containing no duplicates after calculation from the uncertainty method 
+    or the proximity method, in standard formatting.
     
     Returns:
-    data_final: A list of standard formatting data which includes the overlapped data without 
-    any duplicate points or multiple measurements of the same localization.
+    data_final: A dictionary of data which includes the overlapped data without any duplicate points or multiple measurements of 
+    the same localization, in standard formatting.
     """
     Isolated = []
     Grouped = []
@@ -265,9 +272,12 @@ def Isolated_Points(data):
         if (len(indexes)==1):
             Isolated.append(indexes)
         else:
-            Grouped.append(indexes)
+            Grouped.append(indexes)    
     Isolated = np.asarray(Isolated).flatten()
-    Grouped = np.unique(np.asarray(Grouped, dtype=object)).tolist()
+    Groups = []
+    for item in Grouped:
+        if item not in Groups:
+            Groups.append(item)
     Grouped_Selection = []
     for k in range(0, len(Grouped)):
         Uncertainty_Number = []
@@ -292,15 +302,15 @@ def Isolated_Points(data):
             "XY Intensity [A.U.]":points[5], "Z Intensity [A.U.]":points[6], 
             "XY Sigma [nm]":points[7], "Z Sigma [nm]":points[8]}
     return data_final
+Raw_Data = Set_Units(XYPIX, ZPIX, Name1, Name2)
+Overlap_Data = Find_Overlap(XYSEARCH, ZSEARCH, Raw_Data)
 
-Raw_Data = Set_Units(230, 13, 'XY.csv','XZ.csv')
-Overlap_Data = Find_Overlap(230, 40, Raw_Data)
 Certain_Data = Uncertainty_Calculation(Overlap_Data)
 Close_Data = Proximity_Calculation(Overlap_Data)
 Final_Uncertainty = Isolated_Points(Certain_Data)
 Final_Proximity = Isolated_Points(Close_Data)
-
 Final_Uncertainty_File = pd.DataFrame(data=Final_Uncertainty)
 Final_Uncertainty_File.to_csv("3DSTORM_UncertaintyMethod.csv", sep=',', index=False, encoding='utf-8')
 Final_Proximity_File = pd.DataFrame(data=Final_Proximity)
 Final_Proximity_File.to_csv("3DSTORM_ProximityMethod.csv", sep=',', index=False, encoding='utf-8')
+print("Download Complete")
