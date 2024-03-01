@@ -75,12 +75,12 @@ class file_preparation(object):
         Return:
             None. Will modify the data established in place.
         """
-        for i in self.dfxy.keys()[0:2]:
-            self.dfxy[str(i)] = self.dfxy[str(i)]-(max(self.dfxy[str(i)]) + min(self.dfxy[str(i)]))/2
-        for j in self.dfxz.keys()[0:2]:
-            self.dfxz[str(j)] = self.dfxz[str(j)]-(max(self.dfxz[str(j)]) + min(self.dfxz[str(j)]))/2
+        self.dfxz["X_XZ"] = self.dfxz["X_XZ"]-(max(self.dfxy["X_XY"])+min(self.dfxy["X_XY"]))/2
+        self.dfxy["X_XY"] = self.dfxy["X_XY"]-(max(self.dfxy["X_XY"])+min(self.dfxy["X_XY"]))/2
+        self.dfxz["Y_XZ"] = self.dfxz["Y_XZ"]-(max(self.dfxy["Y_XY"])+min(self.dfxy["Y_XY"]))/2
+        self.dfxy["Y_XY"] = self.dfxy["Y_XY"]-(max(self.dfxy["Y_XY"])+min(self.dfxy["Y_XY"]))/2
         self.dfxy["Z_XY"] = self.dfxy["Z_XY"]-max(self.dfxy["Z_XY"])/2
-        self.dfxz["Z_XZ"] = self.dfxz["Z_XZ"]-max(self.dfxz["Z_XZ"])/2
+        self.dfxz["Z_XZ"] = self.dfxz["Z_XZ"]-max(self.dfxy["Z_XY"])/2
         return self
     
     def limiting(self, axis, orientation, limit, direction):
