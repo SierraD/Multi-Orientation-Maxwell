@@ -80,8 +80,8 @@ class preparation(object):
         self.dfxy["X_XY"] = self.dfxy["X_XY"]-(max(self.dfxy["X_XY"])+min(self.dfxy["X_XY"]))/2
         self.dfxz["Y_XZ"] = self.dfxz["Y_XZ"]-(max(self.dfxy["Y_XY"])+min(self.dfxy["Y_XY"]))/2
         self.dfxy["Y_XY"] = self.dfxy["Y_XY"]-(max(self.dfxy["Y_XY"])+min(self.dfxy["Y_XY"]))/2
-        self.dfxy["Z_XY"] = self.dfxy["Z_XY"]-max(self.dfxy["Z_XY"])/2
-        self.dfxz["Z_XZ"] = self.dfxz["Z_XZ"]-max(self.dfxy["Z_XY"])/2
+        self.dfxy["Z_XY"] = self.dfxy["Z_XY"]-max(self.dfxy["Z_XZ"])/2
+        self.dfxz["Z_XZ"] = self.dfxz["Z_XZ"]-max(self.dfxy["Z_XZ"])/2
         return self
     
     
