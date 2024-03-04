@@ -1,8 +1,8 @@
-class file_preparation(object):
+class preparation(object):
     """
     Sierra Dean
     RIKEN SPring-8 Center
-    2024
+    March 1st 2024
     """
     
     def __init__(self, file_xy, file_xz, magnification=20, pixelsize_xy=230, pixelsize_xz=13, TS_dims = 2):
@@ -58,9 +58,10 @@ class file_preparation(object):
                                self.df_xz["sigma [nm]"]*self.xypix, 
                                self.df_xz["sigma [nm]"]*self.zpix], 
                                keys=["X_XZ", "Z_XZ", "U_X", "U_Z","I_XZ", "S_X", "S_Z"], axis=1)
+        
         if TS_dims == 2:
-            self.dfxy.insert(2, "Z_XY", self.df_xy["frame"]*self.zpix)
-            self.dfxz.insert(1, "Y_XZ", self.df_xz["frame"]*self.xypix)
+            self.dfxy.insert(2, "Z_XY", (self.df_xy["frame"]*self.zpix))
+            self.dfxz.insert(1, "Y_XZ", (self.df_xz["frame"]*self.xypix))
         elif TS_dims == 3:
             self.dfxy.insert(2, "Z_XY", self.df_xy["frame"])
             self.dfxz.insert(1, "Y_XZ", self.df_xz["frame"])
@@ -82,6 +83,8 @@ class file_preparation(object):
         self.dfxy["Z_XY"] = self.dfxy["Z_XY"]-max(self.dfxy["Z_XY"])/2
         self.dfxz["Z_XZ"] = self.dfxz["Z_XZ"]-max(self.dfxy["Z_XY"])/2
         return self
+    
+    
     
     def limiting(self, axis, orientation, limit, direction):
         """
