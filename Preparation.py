@@ -4,8 +4,10 @@ class preparation(object):
     RIKEN SPring-8 Center
     March 4 2024
     """
+    def __init__(self):
+        return 
     
-    def __init__(self, file_xy, file_xz, magnification=20, pixelsize_xy=230, pixelsize_xz=13, TS_dims = 2):
+    def setting(self, file_xy, file_xz, magnification=20, pixelsize_xy=230, pixelsize_xz=13, TS_dims = 2):
         """
         A technique to prepare the ThunderSTORM results obtained from a LSM Scan for 3D mapping and analysis.
         
@@ -67,7 +69,7 @@ class preparation(object):
             self.dfxz.insert(1, "Y_XZ", self.df_xz["frame"])
         self.xy_len = len(self.dfxy)
         self.xz_len = len(self.dfxz)
-        return 
+        return self
     
     def set_to_center(self):
         """
