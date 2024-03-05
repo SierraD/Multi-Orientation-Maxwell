@@ -18,7 +18,85 @@ class plotting(object):
         self.data = data
         return
     
-    def tricolumn(self, dimensions=2):
+    def onecolumn(self, axis="XY", dimensions=2, scale_by_size=False, show_error=False):
+        """
+        A technique to visualize the 3D results as a single plot of two dimensional data with the orientation specified, 
+        inlcuding the error bars for the localization.
+        
+        Attributes:
+        dimensions: int 2 or 3 
+            The dimensions of the data, either 2D for the XY/XZ data or 3D for the finalized data.
+        scale_by_size: list [100,100], etc
+            The dimensions to be used for the width and height of the figure.
+        show_error: bool
+            True or False for showing the error bars.
+ 
+        Return:
+            A plot displaying the localizations as three columns of 2D data.
+        """
+        fig = go.Figure()
+        if type(scale_by_size) == list:
+            fig.update_layout(autosize=False, width=scale_by_size[0], height=scale_by_size[1])
+        if axis == "XY":
+            if dimensions == 2:
+                fig.add_trace(go.Scatter(x=self.data.dfxy["X_XY"], y=self.data.dfxy["Y_XY"], name="XY",
+                                         error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                      visible=show_error, width=1, color="gray"), 
+                                         error_y=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                      visible=show_error, width=1, color="gray"),
+                                         marker=dict(color="Red", size=2), mode="markers"))
+                fig.add_trace(go.Scatter(x=self.data.dfxz["X_XZ"], y=self.data.dfxz["Y_XZ"], name="XZ",
+                                     error_x=dict(type='data', array=self.data.dfxz["U_X"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                         marker=dict(color="Blue", size=2), mode="markers"))
+
+            elif dimensions == 3:
+                fig.add_trace(go.Scatter(x=self.data.points["X [nm]"], y=self.data.points["Y [nm]"],
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
+                                     marker=dict(color="Black", size=2), mode="markers", showlegend=False))
+        elif axis == "XZ":
+            if dimensions == 2:
+                fig.add_trace(go.Scatter(x=self.data.dfxy["X_XY"], y=self.data.dfxy["Z_XY"], 
+                                         error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                      visible=show_error, width=1, color="gray"), 
+                                         marker=dict(color="Red", size=2), mode="markers", showlegend=False))
+                fig.add_trace(go.Scatter(x=self.data.dfxz["X_XZ"], y=self.data.dfxz["Z_XZ"], 
+                                         error_x=dict(type='data', array=self.data.dfxz["U_X"], 
+                                                      visible=show_error, width=1, color="gray"), 
+                                         error_y=dict(type='data', array=self.data.dfxz["U_Z"], 
+                                                      visible=show_error, width=1, color="gray"),    
+                                         marker=dict(color="Blue", size=2), mode="markers", showlegend=False))
+            elif dimensions == 3:
+                fig.add_trace(go.Scatter(x=self.data.points["X [nm]"], y=self.data.points["Z [nm]"],
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
+                                     marker=dict(color="Black", size=2), mode="markers", showlegend=False))
+        elif axis == "YZ":
+            if dimensions == 2:
+                fig.add_trace(go.Scatter(x=self.data.dfxy["Y_XY"], y=self.data.dfxy["Z_XY"], 
+                                         error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                      visible=show_error, width=1, color="gray"), 
+                                         marker=dict(color="Red", size=2), mode="markers", showlegend=False))
+                fig.add_trace(go.Scatter(x=self.data.dfxz["Y_XZ"], y=self.data.dfxz["Z_XZ"], 
+                                         error_y=dict(type='data', array=self.data.dfxz["U_Z"], 
+                                                      visible=show_error, width=1, color="gray"),    
+                                         marker=dict(color="Blue", size=2), mode="markers", showlegend=False))
+            elif dimensions == 3:
+                fig.add_trace(go.Scatter(x=self.data.points["Y [nm]"], y=self.data.points["Z [nm]"],
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
+                                     marker=dict(color="Black", size=2), mode="markers", showlegend=False))
+        fig.show()
+        return
+    
+    def tricolumn(self, dimensions=2, scale_by_size=False, show_error=False):
         """
         A technique to visualize the 3D results as three columns of two dimensional data, 
         inlcuding the error bars for the localization.
@@ -31,39 +109,55 @@ class plotting(object):
             A plot displaying the localizations as three columns of 2D data.
         """
         fig = make_subplots(rows=1, cols=3, subplot_titles=("XY Orientation", "XZ Orientation", "YZ Orientation"))
+        if type(scale_by_size) == list:
+            fig.update_layout(autosize=False, width=scale_by_size[0], height=scale_by_size[1])
         if dimensions == 2:
             fig.add_trace(go.Scatter(x=self.data.dfxy["X_XY"], y=self.data.dfxy["Y_XY"], name="XY",
-                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], visible=True, width=1, color="gray"), 
-                                     error_y=dict(type='data', array=self.data.dfxy["U_XY"], visible=True, width=1, color="gray"),   
+                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                  visible=show_error, width=1, color="gray"),   
                                      marker=dict(color="Red", size=2), mode="markers"), row=1, col=1)
             fig.add_trace(go.Scatter(x=self.data.dfxz["X_XZ"], y=self.data.dfxz["Y_XZ"], name="XZ",
-                                     error_x=dict(type='data', array=self.data.dfxz["U_X"], visible=True, width=1, color="gray"), 
+                                     error_x=dict(type='data', array=self.data.dfxz["U_X"], 
+                                                  visible=show_error, width=1, color="gray"), 
                                  marker=dict(color="Blue", size=2), mode="markers"), row=1, col=1)
             fig.add_trace(go.Scatter(x=self.data.dfxy["X_XY"], y=self.data.dfxy["Z_XY"], 
-                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], visible=True, width=1, color="gray"), 
+                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                  visible=show_error, width=1, color="gray"), 
                                      marker=dict(color="Red", size=2), mode="markers", showlegend=False), row=1, col=2)
             fig.add_trace(go.Scatter(x=self.data.dfxz["X_XZ"], y=self.data.dfxz["Z_XZ"], 
-                                     error_x=dict(type='data', array=self.data.dfxz["U_X"], visible=True, width=1, color="gray"), 
-                                     error_y=dict(type='data', array=self.data.dfxz["U_Z"], visible=True, width=1, color="gray"),    
+                                     error_x=dict(type='data', array=self.data.dfxz["U_X"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.dfxz["U_Z"], 
+                                                  visible=show_error, width=1, color="gray"),    
                                      marker=dict(color="Blue", size=2), mode="markers", showlegend=False), row=1, col=2)
             fig.add_trace(go.Scatter(x=self.data.dfxy["Y_XY"], y=self.data.dfxy["Z_XY"], 
-                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], visible=True, width=1, color="gray"), 
+                                     error_x=dict(type='data', array=self.data.dfxy["U_XY"], 
+                                                  visible=show_error, width=1, color="gray"), 
                                      marker=dict(color="Red", size=2), mode="markers", showlegend=False), row=1, col=3)
             fig.add_trace(go.Scatter(x=self.data.dfxz["Y_XZ"], y=self.data.dfxz["Z_XZ"], 
-                                     error_y=dict(type='data', array=self.data.dfxz["U_Z"], visible=True, width=1, color="gray"),    
+                                     error_y=dict(type='data', array=self.data.dfxz["U_Z"], 
+                                                  visible=show_error, width=1, color="gray"),    
                                      marker=dict(color="Blue", size=2), mode="markers", showlegend=False), row=1, col=3)
         elif dimensions == 3:
             fig.add_trace(go.Scatter(x=self.data.points["X [nm]"], y=self.data.points["Y [nm]"],
-                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], visible=True, width=1, color="gray"), 
-                                     error_y=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], visible=True, width=1, color="gray"),   
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
                                      marker=dict(color="Black", size=2), mode="markers", showlegend=False), row=1, col=1)
             fig.add_trace(go.Scatter(x=self.data.points["X [nm]"], y=self.data.points["Z [nm]"],
-                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], visible=True, width=1, color="gray"), 
-                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], visible=True, width=1, color="gray"),   
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
                                      marker=dict(color="Black", size=2), mode="markers", showlegend=False), row=1, col=2)
             fig.add_trace(go.Scatter(x=self.data.points["Y [nm]"], y=self.data.points["Z [nm]"],
-                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], visible=True, width=1, color="gray"), 
-                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], visible=True, width=1, color="gray"),   
+                                     error_x=dict(type='data', array=self.data.points["Uncertainty XY [nm]"], 
+                                                  visible=show_error, width=1, color="gray"), 
+                                     error_y=dict(type='data', array=self.data.points["Uncertainty Z [nm]"], 
+                                                  visible=show_error, width=1, color="gray"),   
                                      marker=dict(color="Black", size=2), mode="markers", showlegend=False), row=1, col=3)
         fig.update_xaxes(title_text="X [nm]", row=1, col=1, title_standoff = 0)
         fig.update_yaxes(title_text="Y [nm]", row=1, col=1, title_standoff = 0)
@@ -74,7 +168,7 @@ class plotting(object):
         fig.show()
         return self
     
-    def tricolumn_sigma(self, dimensions=2):
+    def tricolumn_sigma(self, dimensions=2, scale_by_size=False):
         """
         A technique to visualize the 3D results as three columns of two dimensional data, 
         with the size of the markers represented as the sigma value obtained from ThunderSTORM.
@@ -88,6 +182,8 @@ class plotting(object):
         """
         if dimensions == 2:
             fig = make_subplots(rows=1, cols=2, subplot_titles=("XY Orientation", "XZ Orientation"))
+            if type(scale_by_size) == list:
+                fig.update_layout(autosize=False, width=scale_by_size[0], height=scale_by_size[1])
             left_x_xy = self.data.dfxy["X_XY"] - self.data.dfxy["S_XY"]
             right_x_xy = self.data.dfxy["X_XY"] + self.data.dfxy["S_XY"]
             left_y = self.data.dfxy["Y_XY"] - self.data.dfxy["S_XY"]
@@ -113,6 +209,8 @@ class plotting(object):
             fig.show()
         elif dimensions == 3:
             fig = make_subplots(rows=1, cols=3, subplot_titles=("XY Orientation", "XZ Orientation", "YZ Orientation"))
+            if type(scale_by_size) == list:
+                fig.update_layout(autosize=False, width=scale_by_size[0], height=scale_by_size[1])
             left_x = self.data.points["X [nm]"] - self.data.points["Sigma XY [nm]"]
             right_x = self.data.points["X [nm]"] + self.data.points["Sigma XY [nm]"]
             left_y = self.data.points["Y [nm]"] - self.data.points["Sigma XY [nm]"]
@@ -141,7 +239,7 @@ class plotting(object):
             fig.show()
         return
     
-    def three_dimensional(self, dimensions=2):
+    def three_dimensional(self, dimensions=2, scale_by_size=False):
         """
         A technique to visualize the 3D results of the localizations.
         
@@ -153,10 +251,14 @@ class plotting(object):
             A 3D visualization of the localizations.
         """
         fig = go.Figure()
+        if type(scale_by_size) == list:
+            fig.update_layout(width=scale_by_size[0], height=scale_by_size[1])
         if dimensions == 2:
             fig.add_trace(go.Scatter3d(x=self.data.dfxy["X_XY"], y=self.data.dfxy["Y_XY"], z=self.data.dfxy["Z_XY"],
+                                       name = "XY",
                                        marker=dict(color="#FF2D00", size=2), mode="markers"))
             fig.add_trace(go.Scatter3d(x=self.data.dfxz["X_XZ"], y=self.data.dfxz["Y_XZ"], z=self.data.dfxz["Z_XZ"],
+                                       name = "XZ",
                                        marker=dict(color="#001BFF", size=2), mode="markers"))
         elif dimensions == 3:
             fig.add_trace(go.Scatter3d(x=self.data.points["X [nm]"], y=self.data.points["Y [nm]"], z=self.data.points["Z [nm]"],
@@ -164,7 +266,7 @@ class plotting(object):
         fig.show()
         return
     
-    def three_dimensional_sigma(self, dimensions=3):
+    def three_dimensional_sigma(self, dimensions=3, scale_by_size=False):
         """
         A technique to visualize the 3D results of the localizations, 
         with the size represented as the sigma value obtained from ThunderSTORM.
@@ -181,6 +283,8 @@ class plotting(object):
             raise ValueError("The PSF is only three dimensional after the data has been converted to three dimensions.")
         u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
         fig = make_subplots(rows=1, cols=1, specs=[[{'is_3d': True}]])
+        if type(scale_by_size) == list:
+            fig.update_layout(width=scale_by_size[0], height=scale_by_size[1])
         for i in range(0,len(self.data.points["X [nm]"])):
             x = self.data.points["Sigma XY [nm]"][i]*np.cos(u)*np.sin(v)+self.data.points["X [nm]"][i]
             y = self.data.points["Sigma XY [nm]"][i]*np.sin(u)*np.sin(v)+self.data.points["Y [nm]"][i]
