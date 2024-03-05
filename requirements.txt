@@ -1,0 +1,7 @@
+numpy
+pandas
+scipy
+fitter
+matplotlib
+plotly
+seaborn
