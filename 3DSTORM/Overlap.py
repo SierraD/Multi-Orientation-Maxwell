@@ -40,22 +40,27 @@ class overlap(object):
         Return:
             None. Will modify the data established in place.
         """
-        XY_index = []
-        XZ_index = []
+        all_indexes_XY = []
+        all_indexes_XZ = []
         for i in range(0, len(self.data.dfxz["X_XZ"])):
-            count = 0
-            x_u = self.data.dfxz["U_X"][i]
-            for j in range(0, len(self.data.dfxy["X_XY"])):
-                if (self.data.dfxz["X_XZ"][i] - x_u < self.data.dfxy["X_XY"][j] < self.data.dfxz["X_XZ"][i] + x_u):
-                    if (self.data.dfxz["Y_XZ"][i] - xy_range < self.data.dfxy["Y_XY"][j] < self.data.dfxz["Y_XZ"][i] + xy_range):
-                        if (self.data.dfxz["Z_XZ"][i] - z_range < self.data.dfxy["Z_XY"][j] < self.data.dfxz["Z_XZ"][i] + z_range):
-                            count += 1
-                if (count>0):
-                    XY_index.append(j)
-                    XZ_index.append(i)
-                    count=0
-        self.XY_indexes = XY_index
-        self.XZ_indexes = XZ_index
+            x_left = np.where(self.data.dfxz["X_XZ"][i]-self.data.dfxz["U_X"][i]<self.data.dfxy["X_XY"])
+            x_right = np.where(self.data.dfxy["X_XY"]<self.data.dfxz["X_XZ"][i]+self.data.dfxz["U_X"][i])
+            x = np.intersect1d(x_left, x_right)
+            y_left = np.where(self.data.dfxz["Y_XZ"][i]-xy_range<self.data.dfxy["Y_XY"])
+            y_right = np.where(self.data.dfxy["Y_XY"]<self.data.dfxz["Y_XZ"][i]+xy_range)
+            y = np.intersect1d(y_left, y_right)
+            xy = np.intersect1d(x, y)
+            if xy.size != 0:
+                z_left = np.where(self.data.dfxz["Z_XZ"][i]-z_range<self.data.dfxy["Z_XY"])
+                z_right = np.where(self.data.dfxy["Z_XY"]<self.data.dfxz["Z_XZ"][i]+z_range)
+                z = np.intersect1d(z_left, z_right)
+                all_pts = np.intersect1d(xy, z)
+                if all_pts.size !=0:
+                    value = [i]*len(all_pts)
+                    all_indexes_XY.append(all_pts.tolist())
+                    all_indexes_XZ.append(value)
+        self.XY_indexes = sum(all_indexes_XY, []) 
+        self.XZ_indexes = sum(all_indexes_XZ, [])
         return self
     
     def values(self):
