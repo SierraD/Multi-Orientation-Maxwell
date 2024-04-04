@@ -24,7 +24,12 @@ class overlap(object):
     
     def indexes(self, z_range, xy_range):
         """
-        A technique to determine the indexes of the dataframe where points overlap.
+        A technique to determine the indexes of the dataframe where points overlap. This version, computationally simpler
+        than its counterpart, defines a 3D sphere around each XY orientation point comprised of that point's uncertainty
+        values, and searches to see if any XZ point exists within that 3D range. Although equally accurate, this method has 
+        a tendency to dismiss particle overlaps since XZ is regarded as a ground truth data, and the XZ uncertainties are 
+        not taken into account. Therefore, if two particles only overlap due to the positional uncertainty from both XY
+        and XZ orientations, they will not be included.
         
         Attributes:
         z_range: int
@@ -61,6 +66,84 @@ class overlap(object):
                     all_indexes_XZ.append(value)
         self.XY_indexes = sum(all_indexes_XY, []) 
         self.XZ_indexes = sum(all_indexes_XZ, [])
+        return self
+    
+    def indexes_computational(self, z_range, xy_range):
+        """
+        A technique to determine the indexes of the dataframe where points overlap. This version, computationally heavy
+        compared to its counterpart, defines 3D spheres around all points comprised of that point's uncertainty values, 
+        and searches to see if any other 3D sphere exist within the defined range. Due to the computational cost of this
+        method, it is recommended that the simplified version be run first, and this method only used if it is imperative
+        to obtain overlap from all points.
+        
+        Attributes:
+        z_range: int
+            The search radius for the overlap in the Z direction, in nanometers. 
+            Generally selected to be either the step size between images or the width of the lightsheet, if known.
+            Represents the intial positional uncertainty of the Z dimension obtained from the XY orientation.
+        xy_range: int
+            The search radius for the overlap in the XY directions, in nanometers.
+            Generally selected to be the image pixel size in the XY orientation.
+            Represents the initial positional uncertainty of the Y dimension,
+            obtained from rotating the XY data to the XZ orientation through a pixelwise transformation without interpolation.
+            
+        Return:
+            None. Will modify the data established in place.
+        """
+        
+        range_x_xz = []
+        range_x_xy = []
+        range_y_xz = []
+        range_y_xy = []
+        range_z_xz = []
+        range_z_xy = []
+        for i in range(0, len(self.data.dfxz["X_XZ"])):
+            x_left_xz = (self.data.dfxz["X_XZ"][i]-self.data.dfxz["U_X"][i])
+            x_right_xz = (self.data.dfxz["X_XZ"][i]+self.data.dfxz["U_X"][i])
+            y_left_xz = (self.data.dfxz["Y_XZ"][i]-xy_range)
+            y_right_xz = (self.data.dfxz["Y_XZ"][i]+xy_range)
+            z_left_xz = (self.data.dfxz["Z_XZ"][i]-self.data.dfxz["U_Z"][i])
+            z_right_xz = (self.data.dfxz["Z_XZ"][i]+self.data.dfxz["U_Z"][i])
+            range_x_xz.append(pd.Interval(x_left_xz, x_right_xz))
+            range_y_xz.append(pd.Interval(y_left_xz, y_right_xz))
+            range_z_xz.append(pd.Interval(z_left_xz, z_right_xz))
+        new_columns_data = {"X Range": range_x_xz, 
+                            "Y Range": range_y_xz, 
+                            "Z Range": range_z_xz}  
+        new_columns_df = pd.DataFrame(new_columns_data)
+        self.data.dfxz = pd.concat([self.data.dfxz, new_columns_df], axis=1)
+        for j in range(0, len(Step1.dfxy["X_XY"])):
+            x_left_xy = (self.data.dfxy["X_XY"][j]-self.data.dfxy["U_XY"][j])
+            x_right_xy = (self.data.dfxy["X_XY"][j]+self.data.dfxy["U_XY"][j])
+            y_left_xy = (self.data.dfxy["Y_XY"][j]-self.data.dfxy["U_XY"][j])
+            y_right_xy = (self.data.dfxy["Y_XY"][j]+self.data.dfxy["U_XY"][j])
+            z_left_xy = (self.data.dfxy["Z_XY"][j]-z_range)
+            z_right_xy = (self.data.dfxy["Z_XY"][j]+z_range)
+            range_x_xy.append(pd.Interval(x_left_xy, x_right_xy))
+            range_y_xy.append(pd.Interval(y_left_xy, y_right_xy))
+            range_z_xy.append(pd.Interval(z_left_xy, z_right_xy))
+        new_columns_datay = {"X Range": range_x_xy, 
+                             "Y Range": range_y_xy, 
+                             "Z Range": range_z_xy}  
+        new_columns_dfy = pd.DataFrame(new_columns_datay)
+        self.data.dfxy = pd.concat([self.data.dfxy, new_columns_dfy], axis=1)
+        all_indexes_XY = []
+        all_indexes_XZ = []
+        for k in range(0, len(self.data.dfxz["X_XZ"])):
+            x = []
+            y = []
+            z = []
+            [x.append(np.where(self.data.dfxy["X Range"]==subset)[0][0]) for subset in self.data.dfxy["X Range"] if self.data.dfxz["X Range"][k].overlaps(subset)]
+            [y.append(np.where(self.data.dfxy["Y Range"]==subset)[0][0]) for subset in self.data.dfxy["Y Range"] if self.data.dfxz["Y Range"][k].overlaps(subset)]
+            [z.append(np.where(self.data.dfxy["Z Range"]==subset)[0][0]) for subset in self.data.dfxy["Z Range"] if self.data.dfxz["Z Range"][k].overlaps(subset)]
+            xy = np.intersect1d(x, y)
+            xyz = np.intersect1d(xy, z)
+            if xyz.size != 0:
+                value = [k]*len(xyz)
+                all_indexes_XY.append(xyz.tolist())
+                all_indexes_XZ.append(value)
+        self.XY_indexes=sum(all_indexes_XY, []) 
+        self.XZ_indexes=sum(all_indexes_XZ, [])
         return self
     
     def values(self):
