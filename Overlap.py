@@ -90,7 +90,6 @@ class overlap(object):
         Return:
             None. Will modify the data established in place.
         """
-        
         range_x_xz = []
         range_x_xy = []
         range_y_xz = []
@@ -104,46 +103,51 @@ class overlap(object):
             y_right_xz = (self.data.dfxz["Y_XZ"][i]+xy_range)
             z_left_xz = (self.data.dfxz["Z_XZ"][i]-self.data.dfxz["U_Z"][i])
             z_right_xz = (self.data.dfxz["Z_XZ"][i]+self.data.dfxz["U_Z"][i])
-            range_x_xz.append(pd.Interval(x_left_xz, x_right_xz))
-            range_y_xz.append(pd.Interval(y_left_xz, y_right_xz))
-            range_z_xz.append(pd.Interval(z_left_xz, z_right_xz))
-        new_columns_data = {"X Range": range_x_xz, 
-                            "Y Range": range_y_xz, 
-                            "Z Range": range_z_xz}  
+            range_x_xz.append((x_left_xz, x_right_xz))
+            range_y_xz.append((y_left_xz, y_right_xz))
+            range_z_xz.append((z_left_xz, z_right_xz))
+        RX_xz = pd.arrays.IntervalArray.from_tuples(range_x_xz)
+        RY_xz = pd.arrays.IntervalArray.from_tuples(range_y_xz)
+        RZ_xz = pd.arrays.IntervalArray.from_tuples(range_z_xz)
+        new_columns_data = {"X Range XZ": RX_xz, 
+                            "Y Range XZ": RY_xz, 
+                            "Z Range XZ": RZ_xz}  
         new_columns_df = pd.DataFrame(new_columns_data)
         self.data.dfxz = pd.concat([self.data.dfxz, new_columns_df], axis=1)
-        for j in range(0, len(Step1.dfxy["X_XY"])):
+        for j in range(0, len(self.data.dfxy["X_XY"])):
             x_left_xy = (self.data.dfxy["X_XY"][j]-self.data.dfxy["U_XY"][j])
             x_right_xy = (self.data.dfxy["X_XY"][j]+self.data.dfxy["U_XY"][j])
             y_left_xy = (self.data.dfxy["Y_XY"][j]-self.data.dfxy["U_XY"][j])
             y_right_xy = (self.data.dfxy["Y_XY"][j]+self.data.dfxy["U_XY"][j])
             z_left_xy = (self.data.dfxy["Z_XY"][j]-z_range)
             z_right_xy = (self.data.dfxy["Z_XY"][j]+z_range)
-            range_x_xy.append(pd.Interval(x_left_xy, x_right_xy))
-            range_y_xy.append(pd.Interval(y_left_xy, y_right_xy))
-            range_z_xy.append(pd.Interval(z_left_xy, z_right_xy))
-        new_columns_datay = {"X Range": range_x_xy, 
-                             "Y Range": range_y_xy, 
-                             "Z Range": range_z_xy}  
+            range_x_xy.append((x_left_xy, x_right_xy))
+            range_y_xy.append((y_left_xy, y_right_xy))
+            range_z_xy.append((z_left_xy, z_right_xy))
+        RX_xy = pd.arrays.IntervalArray.from_tuples(range_x_xy)
+        RY_xy = pd.arrays.IntervalArray.from_tuples(range_y_xy)
+        RZ_xy = pd.arrays.IntervalArray.from_tuples(range_z_xy)
+        new_columns_datay = {"X Range XY": RX_xy, 
+                             "Y Range XY": RY_xy, 
+                             "Z Range XY": RZ_xy}  
         new_columns_dfy = pd.DataFrame(new_columns_datay)
         self.data.dfxy = pd.concat([self.data.dfxy, new_columns_dfy], axis=1)
         all_indexes_XY = []
         all_indexes_XZ = []
         for k in range(0, len(self.data.dfxz["X_XZ"])):
-            x = []
-            y = []
-            z = []
-            [x.append(np.where(self.data.dfxy["X Range"]==subset)[0][0]) for subset in self.data.dfxy["X Range"] if self.data.dfxz["X Range"][k].overlaps(subset)]
-            [y.append(np.where(self.data.dfxy["Y Range"]==subset)[0][0]) for subset in self.data.dfxy["Y Range"] if self.data.dfxz["Y Range"][k].overlaps(subset)]
-            [z.append(np.where(self.data.dfxy["Z Range"]==subset)[0][0]) for subset in self.data.dfxy["Z Range"] if self.data.dfxz["Z Range"][k].overlaps(subset)]
-            xy = np.intersect1d(x, y)
-            xyz = np.intersect1d(xy, z)
-            if xyz.size != 0:
-                value = [k]*len(xyz)
-                all_indexes_XY.append(xyz.tolist())
-                all_indexes_XZ.append(value)
-        self.XY_indexes=sum(all_indexes_XY, []) 
-        self.XZ_indexes=sum(all_indexes_XZ, [])
+            X_overlap = np.where(RX_xy.overlaps(RX_xz[k]))
+            if X_overlap[0].size != 0:
+                Y_overlap = np.where(RY_xy.overlaps(RY_xz[k]))
+                xy = np.intersect1d(X_overlap, Y_overlap)
+                if xy.size != 0:
+                    Z_overlap = np.where(RZ_xy.overlaps(RZ_xz[k]))
+                    xyz = np.intersect1d(xy, Z_overlap)
+                    if xyz.size != 0:
+                        value = [k]*len(xyz)
+                        all_indexes_XY.append(xyz.tolist())
+                        all_indexes_XZ.append(value)
+        self.XY_indexes = sum(all_indexes_XY, []) 
+        self.XZ_indexes = sum(all_indexes_XZ, [])
         return self
     
     def values(self):
