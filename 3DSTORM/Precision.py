@@ -10,7 +10,7 @@ class precision(object):
         
     source: https://github.com/SierraD/3DSTORM
     
-    Last Updated: May 20 2024
+    Last Updated: May 21 2024
     """
     def __init__(self, data, data_type="Uncertainty XY [nm]",):
         """
