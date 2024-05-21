@@ -134,15 +134,17 @@ class overlap(object):
             None. Will modify the data established in place. 
         """
         df = pd.DataFrame(columns=["X_XY", "Y_XY", "Z_XY", 
-                                   "U_XY", "I_XY", "S_XY", 
+                                   "U_XY", "I_XY", "O_XY", "B_XY", "S_XY", 
                                    "X_XZ", "Y_XZ", "Z_XZ", 
-                                   "U_X", "U_Z", "I_XZ", "S_X", "S_Z"])
+                                   "U_X", "U_Z", "I_XZ", "O_XZ", "B_XZ", "S_X", "S_Z"])
         for i in range(0, len(self.XY_indexes)):
             X_XY = self.data.dfxy["X_XY"][self.XY_indexes[i]]
             Y_XY = self.data.dfxy["Y_XY"][self.XY_indexes[i]]
             Z_XY = self.data.dfxy["Z_XY"][self.XY_indexes[i]]
             U_XY = self.data.dfxy["U_XY"][self.XY_indexes[i]]
             I_XY = self.data.dfxy["I_XY"][self.XY_indexes[i]]
+            O_XY = self.data.dfxy["O_XY"][self.XY_indexes[i]]
+            B_XY = self.data.dfxy["B_XY"][self.XY_indexes[i]]
             S_XY = self.data.dfxy["S_XY"][self.XY_indexes[i]]
             X_XZ = self.data.dfxz["X_XZ"][self.XZ_indexes[i]]
             Y_XZ = self.data.dfxz["Y_XZ"][self.XZ_indexes[i]]
@@ -150,14 +152,16 @@ class overlap(object):
             U_X = self.data.dfxz["U_X"][self.XZ_indexes[i]]
             U_Z = self.data.dfxz["U_Z"][self.XZ_indexes[i]]
             I_XZ = self.data.dfxz["I_XZ"][self.XZ_indexes[i]]
+            O_XZ = self.data.dfxz["O_XZ"][self.XZ_indexes[i]]
+            B_XZ = self.data.dfxz["B_XZ"][self.XZ_indexes[i]]
             S_X = self.data.dfxz["S_X"][self.XZ_indexes[i]]
             S_Z = self.data.dfxz["S_Z"][self.XZ_indexes[i]]
-            df.loc[i] = [X_XY]+[Y_XY]+[Z_XY]+[U_XY]+[I_XY]+[S_XY]+[X_XZ]+[Y_XZ]+[Z_XZ]+[U_X]+[U_Z]+[I_XZ]+[S_X]+[S_Z]
+            df.loc[i] = [X_XY]+[Y_XY]+[Z_XY]+[U_XY]+[I_XY]+[O_XY]+[B_XY]+[S_XY]+[X_XZ]+[Y_XZ]+[Z_XZ]+[U_X]+[U_Z]+[I_XZ]+[O_XZ]+[B_XZ]+[S_X]+[S_Z]
         self.df=df
-        self.dfxy = pd.concat([df["X_XY"], df["Y_XY"], df["Z_XY"], df["U_XY"], df["I_XY"], df["S_XY"]], 
-                            keys=["X_XY", "Y_XY", "Z_XY", "U_XY", "I_XY", "S_XY"], axis=1)
-        self.dfxz = pd.concat([df["X_XZ"], df["Y_XZ"], df["Z_XZ"], df["U_X"], df["U_Z"], df["I_XY"], df["S_X"], df["S_Z"]], 
-                            keys=["X_XZ", "Y_XZ", "Z_XZ", "U_X", "U_Z", "I_XZ", "S_X", "S_Z"], axis=1)
+        self.dfxy = pd.concat([df["X_XY"], df["Y_XY"], df["Z_XY"], df["U_XY"], df["I_XY"], df["O_XY"], df["B_XY"], df["S_XY"]], 
+                            keys=["X_XY", "Y_XY", "Z_XY", "U_XY", "I_XY", "O_XY", "B_XY", "S_XY"], axis=1)
+        self.dfxz = pd.concat([df["X_XZ"], df["Y_XZ"], df["Z_XZ"], df["U_X"], df["U_Z"], df["I_XY"], df["O_XY"], df["B_XY"], df["S_X"], df["S_Z"]], 
+                            keys=["X_XZ", "Y_XZ", "Z_XZ", "U_X", "U_Z", "I_XZ", "O_XZ", "B_XZ", "S_X", "S_Z"], axis=1)
         return self
 
     def download_dataframe(self):
@@ -175,7 +179,9 @@ class overlap(object):
                                                   'Y_XY': 'y_xy [nm]', 
                                                   'Z_XY': 'z_xy [nm]', 
                                                   'U_XY': 'uncertainty_xy [nm]', 
-                                                  'I_XY': 'intensity_xy [photon]', 
+                                                  'I_XY': 'intensity_xy [photon]',
+                                                  'O_XY': 'offset_xy [photon]',
+                                                  'B_XY': 'bkgstd_xy [photon]',
                                                   'S_XY': 'sigma_xy [nm]', 
                                                   'X_XZ': 'x_xz [nm]', 
                                                   'Y_XZ': 'y_xz [nm]', 
@@ -183,6 +189,8 @@ class overlap(object):
                                                   'U_X': 'uncertainty_x [nm]',
                                                   'U_Z': 'uncertainty_z [nm]',
                                                   'I_XZ': 'intensity_xz [photon]',
+                                                  'O_XZ': 'offset_xz [photon]',
+                                                  'B_XZ': 'bkgstd_xz [photon]',
                                                   'S_X': 'sigma_x [nm]', 
                                                   'S_Z': 'sigma_z [nm]'})
         download_df.to_csv("Overlap.py_dfXY_dfXZ.csv", index=False, encoding='utf-8')
