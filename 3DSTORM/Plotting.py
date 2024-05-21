@@ -12,6 +12,7 @@ class plotting(object):
     
     Last Updated: May 21 2024
     """
+    
     def __init__(self, data):
         """
         A technique to visualize the 2D and 3D results obtained from the method.
