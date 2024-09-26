@@ -1,6 +1,6 @@
 class overlap(object):
     """
-    This file is part of the 3D STORM software
+    This file is part of the Multi-Orientation MAXWELL software
     
     File author(s): Sierra Dean <ccnd@live.com>
     
@@ -8,9 +8,9 @@ class overlap(object):
     See accompanying file LICENSE.txt or copy at
         http://www.gnu.org/licenses/gpl-3.0.html
         
-    source: https://github.com/SierraD/3DSTORM
+    source: https://github.com/SierraD/Multi-Orientation-MAXWELL
     
-    Last Updated: June 18 2024
+    Last Updated: Sept 26 2024
     """
     
     def __init__(self, data):
@@ -164,10 +164,10 @@ class overlap(object):
                             keys=["X_XZ", "Y_XZ", "Z_XZ", "U_X", "U_Z", "I_XZ", "O_XZ", "B_XZ", "S_X", "S_Z"], axis=1)
         return self
 
-    def download_dataframe(self, filename="3DSTORM"):
+    def download_dataframe(self, filename="Overlap_Dataframe"):
         """
         A technique to download the data prepared by the Overlap.py method as a CSV file named
-        "Overlap.py_dfXY_dfXZ.csv".
+        "Overlap_Dataframe.csv".
         
         Attributes:
             None.
