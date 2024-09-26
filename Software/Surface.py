@@ -1,6 +1,6 @@
 class surface(object):
     """
-    This file is part of the 3D STORM software
+    This file is part of the Multi-Orientation MAXWELL software
     
     File author(s): Sierra Dean <ccnd@live.com>
     
@@ -8,9 +8,9 @@ class surface(object):
     See accompanying file LICENSE.txt or copy at
         http://www.gnu.org/licenses/gpl-3.0.html
         
-    source: https://github.com/SierraD/3DSTORM
+    source: https://github.com/SierraD/Multi-Orientation-Maxwell
     
-    Last Updated: June 18 2024
+    Last Updated: Sept 26 2024
     """
     def __init__(self, data):
         """
