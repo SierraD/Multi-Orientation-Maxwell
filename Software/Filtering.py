@@ -156,10 +156,10 @@ class filtering(object):
         self.points = points
         return self
     
-    def download_dataframe(self, filename="3DSTORM"):
+    def download_dataframe(self, filename="Filtering_Dataframe"):
         """
         A technique to download the data prepared by the Filtering.py method as a 
-        CSV file named "3DSTORM.csv".
+        CSV file named "Filtering_Dataframe.csv".
         
         Attributes:
             None.
