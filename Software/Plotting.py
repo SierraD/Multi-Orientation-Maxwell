@@ -290,15 +290,15 @@ class plotting(object):
         """
         if dimensions != 3:
             raise ValueError("The PSF is only three dimensional after the data has been converted to three dimensions.")
-        u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+        u, v = numpy.mgrid[0:2*numpy.pi:20j, 0:numpy.pi:10j]
         fig = plotly.subplots.make_subplots(rows=1, cols=1, specs=[[{'is_3d': True}]])
         if type(scale_by_size) == list:
             fig.update_layout(width=scale_by_size[0], height=scale_by_size[1])
         for i in range(0,len(self.data.points["X [nm]"])):
-            x = self.data.points["Sigma XY [nm]"][i]*np.cos(u)*np.sin(v)+self.data.points["X [nm]"][i]
-            y = self.data.points["Sigma XY [nm]"][i]*np.sin(u)*np.sin(v)+self.data.points["Y [nm]"][i]
-            z = self.data.points["Sigma Z [nm]"][i]*np.cos(v)+self.data.points["Z [nm]"][i]
-            fig.add_trace(go.Surface(x=x, y=y, z=z, opacity=0.5), 1, 1)
+            x = self.data.points["Sigma XY [nm]"][i]*numpy.cos(u)*numpy.sin(v)+self.data.points["X [nm]"][i]
+            y = self.data.points["Sigma XY [nm]"][i]*numpy.sin(u)*numpy.sin(v)+self.data.points["Y [nm]"][i]
+            z = self.data.points["Sigma Z [nm]"][i]*numpy.cos(v)+self.data.points["Z [nm]"][i]
+            fig.add_trace(plotly.graph_objects.Surface(x=x, y=y, z=z, opacity=0.5), 1, 1)
         fig.update_traces(showscale=False)
         fig.update_layout(scene = dict(xaxis_title="X [nm]", yaxis_title="Y [nm]", zaxis_title="Z [nm]"))
         fig.show()
